@@ -29,7 +29,7 @@ class Question(models.Model):
     quiz = models.ForeignKey('Quiz', related_name='questions', on_delete=models.CASCADE)
     text = models.CharField(max_length=500)
     question_type = models.CharField(max_length=2, choices=QUESTION_TYPES, default=MULTIPLE_CHOICE)
-    tf_correct_answer = models.BooleanField(null=True, blank=True)  # true/false questions only
+    tf_correct_answer = models.BooleanField(default=False)
 
     def validate_choices(self):
         choices_count = self.choices.count()

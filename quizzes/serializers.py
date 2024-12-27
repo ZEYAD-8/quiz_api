@@ -30,7 +30,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     def get_answers(self, obj):
         if obj.question_type == Question.MULTIPLE_CHOICE:
-            return MCQSerializer(obj.mcqs.all(), many=True).data
+            return MCQSerializer(obj.choices.all(), many=True).data
         elif obj.question_type == Question.MATCHING:
             return MatchingPairSerializer(obj.matching_pairs.all(), many=True).data
         elif obj.question_type == Question.ORDERING:
