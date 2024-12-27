@@ -16,17 +16,18 @@ class Quiz(models.Model):
 class Question(models.Model):
     MULTIPLE_CHOICE = 'MC'
     TRUE_FALSE = 'TF'
-
+    MATCHING = 'MT'
 
     QUESTION_TYPES = [
         (MULTIPLE_CHOICE, 'Multiple Choice'),
         (TRUE_FALSE, 'True/False'),
+        (MATCHING, 'Matching'),
     ]
 
     quiz = models.ForeignKey('Quiz', related_name='questions', on_delete=models.CASCADE)
     text = models.CharField(max_length=500)
     question_type = models.CharField(max_length=2, choices=QUESTION_TYPES, default=MULTIPLE_CHOICE)
-    correct_answer = models.BooleanField(null=True, blank=True)  # true/false questions only
+    tf_correct_answer = models.BooleanField(null=True, blank=True)  # true/false questions only
 
     def validate_choices(self):
         choices_count = self.choices.count()
@@ -48,4 +49,11 @@ class MCQ(models.Model):
 
     def __str__(self):
         return f"MCQ choice: {self.text} with id: {self.id} for question: {self.question.text}"
-    
+
+class MatchingPair(models.Model):
+    question = models.ForeignKey('Question', related_name='matching_pairs', on_delete=models.CASCADE)
+    item = models.CharField(max_length=255)
+    match = models.CharField(max_length=255)
+
+    def __str__(self):
+        return f"Matching Pair: {self.item} -> {self.match} For Question: {self.question.text}"
