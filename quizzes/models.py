@@ -17,11 +17,13 @@ class Question(models.Model):
     MULTIPLE_CHOICE = 'MC'
     TRUE_FALSE = 'TF'
     MATCHING = 'MT'
+    ORDERING = 'OR'
 
     QUESTION_TYPES = [
         (MULTIPLE_CHOICE, 'Multiple Choice'),
         (TRUE_FALSE, 'True/False'),
         (MATCHING, 'Matching'),
+        (ORDERING, 'Ordering'),
     ]
 
     quiz = models.ForeignKey('Quiz', related_name='questions', on_delete=models.CASCADE)
@@ -57,3 +59,11 @@ class MatchingPair(models.Model):
 
     def __str__(self):
         return f"Matching Pair: {self.item} -> {self.match} For Question: {self.question.text}"
+
+class OrderingItem(models.Model):
+    question = models.ForeignKey('Question', related_name='ordering_items', on_delete=models.CASCADE)
+    text = models.CharField(max_length=255)
+    order = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"Order item: {self.text} ({self.order}) for question: {self.question.text}"
