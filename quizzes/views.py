@@ -32,7 +32,7 @@ class QuizDetailView(APIView):
             quiz = self.get_object(quiz_id)
             if quiz is None:
                 return Response(
-                    {"detail": "Quiz not found. Returning a random quiz instead."},
+                    {"detail": "Quiz not found."},
                     status=status.HTTP_404_NOT_FOUND
                 )
 
@@ -98,7 +98,7 @@ class QuestionDetailView(APIView):
             question = self.get_object(question_id)
             if question is None:
                 return Response(
-                    {"detail": "Question not found. Returning a random question instead."},
+                    {"detail": "Question not found."},
                     status=status.HTTP_404_NOT_FOUND
                 )
 
