@@ -26,9 +26,16 @@ class QuizDetailView(APIView):
             return None
 
     def get(self, request, quiz_id):
-        quiz = self.get_object(quiz_id)
-        if quiz is None:
+        if quiz_id == None:
             quiz = Quiz.objects.order_by('?').first()
+        else:
+            quiz = self.get_object(quiz_id)
+            if quiz is None:
+                return Response(
+                    {"detail": "Quiz not found. Returning a random quiz instead."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
         serializer = QuizSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -85,9 +92,16 @@ class QuestionDetailView(APIView):
             return None
 
     def get(self, request, question_id):
-        question = self.get_object(question_id)
-        if question is None:
+        if question_id == None:
             question = Question.objects.order_by('?').first()
+        else:
+            question = self.get_object(question_id)
+            if question is None:
+                return Response(
+                    {"detail": "Question not found. Returning a random question instead."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+
         serializer = QuestionSerializer(question)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
