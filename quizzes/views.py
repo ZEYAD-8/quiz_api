@@ -76,7 +76,7 @@ class QuestionDetailView(APIView):
     def get(self, request, question_id):
         question = self.get_object(question_id)
         if question is None:
-            return Response({"detail": "Question not found."}, status=status.HTTP_404_NOT_FOUND)
+            question = Question.objects.order_by('?').first()
         serializer = QuestionSerializer(question)
         return Response(serializer.data)
 

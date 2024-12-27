@@ -11,5 +11,5 @@ urlpatterns = [
     path('quizzes/<int:quiz_id>/questions/', QuestionListView.as_view(), name='question-list'),
     path('quizzes/<int:quiz_id>/questions/create/', QuestionCreateView.as_view(), name='question-create'),
     path('questions/<int:question_id>/', QuestionDetailView.as_view(), name='question-detail'),
-
+    path('questions/random/', QuestionDetailView.as_view(), name='question-random'),
 ]
