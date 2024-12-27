@@ -9,14 +9,14 @@ class QuizCreateView(APIView):
         serializer = QuizSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class QuizListView(APIView):
     def get(self, request):
         quizzes = Quiz.objects.all()
         serializer = QuizSerializer(quizzes, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class QuizDetailView(APIView):
     def get_object(self, quiz_id):
@@ -30,24 +30,35 @@ class QuizDetailView(APIView):
         if quiz is None:
             quiz = Quiz.objects.order_by('?').first()
         serializer = QuizSerializer(quiz)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, quiz_id):
         quiz = self.get_object(quiz_id)
         if quiz is None:
-            return Response({"detail": "Quiz not found."})
+            return Response(
+                {"detail": "Quiz not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
         serializer = QuizSerializer(quiz, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, quiz_id):
         quiz = self.get_object(quiz_id)
         if quiz is None:
-            return Response({"detail": "Quiz not found."})
+            return Response(
+                {"detail": "Quiz not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
         quiz.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"detail": "Quiz deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class QuestionCreateView(APIView):
@@ -55,15 +66,15 @@ class QuestionCreateView(APIView):
         serializer = QuestionSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class QuestionListView(APIView):
     def get(self, request, quiz_id):
         questions = Question.objects.filter(quiz_id=quiz_id)
         serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 class QuestionDetailView(APIView):
@@ -78,23 +89,33 @@ class QuestionDetailView(APIView):
         if question is None:
             question = Question.objects.order_by('?').first()
         serializer = QuestionSerializer(question)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, question_id):
         question = self.get_object(question_id)
         if question is None:
-            return Response({"detail": "Question not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Question not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
         serializer = QuestionSerializer(question, data=request.data)
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, question_id):
         question = self.get_object(question_id)
         if question is None:
-            return Response({"detail": "Question not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Question not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
         question.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(
+            {"detail": "Question deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT
+        )
     
