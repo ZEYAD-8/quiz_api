@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Quiz, Question, MCQ, MatchingPair, OrderingItem
 
-
+# A serializer for each type of question (MCQ, MatchingPair, OrderingItem)
 class MCQSerializer(serializers.ModelSerializer):
     class Meta:
         model = MCQ
@@ -20,6 +20,8 @@ class OrderingItemSerializer(serializers.ModelSerializer):
         fields = ['id', 'text', 'order']
 
 
+# A serializer for the Question model which will use the appropriate
+# serializer for the answers based on the question type
 class QuestionSerializer(serializers.ModelSerializer):
     answers = serializers.SerializerMethodField()
     class Meta:
@@ -37,8 +39,10 @@ class QuestionSerializer(serializers.ModelSerializer):
             return {"answer": obj.tf_correct_answer}
         return None
 
+
+# A quiz serializer that includes the questions
 class QuizSerializer(serializers.ModelSerializer):
-    questions = QuestionSerializer(many=True, read_only=True)  # Nested serializer for questions
+    questions = QuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Quiz
