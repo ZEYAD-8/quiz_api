@@ -1,6 +1,6 @@
 from django.db import models
+from users.models import UserCustom
 
-# Create your models here.
 class Quiz(models.Model):
     title = models.CharField(max_length=255, default='No title available')
     description = models.TextField(default='No description available', max_length=500)
@@ -8,6 +8,7 @@ class Quiz(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    user = models.ForeignKey(UserCustom, related_name='quizzes', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"Quiz: {self.title} with id: {self.id}"
