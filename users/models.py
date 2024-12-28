@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 
-# Create your models here.
-
 
 class UserCustom(AbstractUser):
     email = models.EmailField(unique=True)
@@ -11,6 +9,17 @@ class UserCustom(AbstractUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['is_creator', 'is_admin']
+
+    groups = models.ManyToManyField(
+        Group,
+        related_name='usercustom_groups',
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name='usercustom_premissions',
+        blank=True
+    )
 
     def created_quizzes(self):
         return self.quizzes.all()
