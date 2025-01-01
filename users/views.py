@@ -24,9 +24,7 @@ class LoginUserView(APIView):
     def post(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
-
         user = authenticate(request, email=email, password=password)
-        
         if user:
             login(request, user)
             refresh = RefreshToken.for_user(user)
@@ -38,13 +36,13 @@ class LoginUserView(APIView):
         return Response({'message': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LogoutUserView(APIView):
+# class LogoutUserView(APIView):
 
-    permission_classes = [permissions.IsAuthenticated]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
-        logout(request)
-        return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
+#     def post(self, request):
+#         logout(request)
+#         return Response({'message': 'Logged out successfully'}, status=status.HTTP_200_OK)
 
 
 class UserProfileView(APIView):
