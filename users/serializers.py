@@ -18,6 +18,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirm')
+        validated_data['username'] = "Username is not used"
+        validated_data['is_admin'] = False
         user = UserCustom.objects.create_user(**validated_data)
         return user
 

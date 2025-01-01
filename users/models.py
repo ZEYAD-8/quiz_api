@@ -6,6 +6,7 @@ class UserCustom(AbstractUser):
     email = models.EmailField(unique=True)
     is_creator = models.BooleanField(default=False)
     is_admin = models.BooleanField(default=False)
+    username = models.CharField(max_length=30, unique=False, blank=True, null=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['is_creator', 'is_admin']
