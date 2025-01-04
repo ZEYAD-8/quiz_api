@@ -17,15 +17,17 @@ class MatchingPairSerializer(serializers.ModelSerializer):
 
 
 class OrderingItemSerializer(serializers.ModelSerializer):
+    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all(), required=False)
     class Meta:
         model = OrderingItem
-        fields = ['id', 'text', 'order']
+        fields = ['id', 'text', 'order', 'question']
 
 
 
 class QuestionSerializer(serializers.ModelSerializer):
     choices = MCQSerializer(many=True, required=False)
     matching_pairs = MatchingPairSerializer(many=True, required=False)
+    ordering_items = OrderingItemSerializer(many=True, required=False)
     class Meta:
         model = Question
         fields = [
@@ -37,6 +39,8 @@ class QuestionSerializer(serializers.ModelSerializer):
         question_type = validated_data.get('question_type')
         choices_data = validated_data.pop('choices', [])
         matching_pairs_data = validated_data.pop('matching_pairs', [])
+        ordering_items_data = validated_data.pop('ordering_items', [])
+
         validated_data['quiz'] = Quiz.objects.get(id=3)
         question = Question.objects.create(**validated_data)
 
@@ -44,7 +48,6 @@ class QuestionSerializer(serializers.ModelSerializer):
             for choice_data in choices_data:
                 try:
                     choice_data['question'] = question
-                    print(f"Creating MCQ with data:\n{choice_data}")
                     MCQ.objects.create(**choice_data)
                 except Exception as e:
                     print(e)
@@ -52,12 +55,24 @@ class QuestionSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError("Invalid choice data.")
 
         elif question_type == Question.MATCHING:
-            print(f"Matching Pairs Data: {matching_pairs_data}")
             for pair_data in matching_pairs_data:
-                pair_data['question'] = question
-                print(f"{pair_data['item']} -> {pair_data['match']}")
-                print(f"Creating Matching Pair with data:\n{pair_data}")
-                MatchingPair.objects.create(**pair_data)
+                try:
+                    pair_data['question'] = question
+                    MatchingPair.objects.create(**pair_data)
+                except Exception as e:
+                    print(e)
+                    question.delete()
+                    raise serializers.ValidationError("Invalid matching pair data.")
+
+        elif question_type == Question.ORDERING:
+            for item_data in ordering_items_data:
+                try:
+                    item_data['question'] = question
+                    OrderingItem.objects.create(**item_data)
+                except Exception as e:
+                    print(e)
+                    question.delete()
+                    raise serializers.ValidationError("Invalid ordering item data.")
 
         # if not question.validate_choices():
         #     question.delete()
