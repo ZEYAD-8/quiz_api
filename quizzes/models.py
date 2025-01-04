@@ -36,11 +36,13 @@ class Question(models.Model):
         choices_count = self.choices.count()
         if choices_count != 4:
             raise ValueError("Each question must have exactly 4 choices.")
+        return True
 
     def validate_correct_answer(self):
         correct_count = self.choices.filter(is_correct=True).count()
         if correct_count == 0:
             raise ValueError("At least one choice must be marked as correct.")
+        return True
 
     def __str__(self):
         return f"Question with id: {self.id} for quiz with id: {self.quiz.id}"
