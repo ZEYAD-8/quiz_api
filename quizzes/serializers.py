@@ -10,9 +10,10 @@ class MCQSerializer(serializers.ModelSerializer):
 
 
 class MatchingPairSerializer(serializers.ModelSerializer):
+    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all(), required=False)
     class Meta:
         model = MatchingPair
-        fields = ['id', 'item', 'match']
+        fields = ['id', 'item', 'match', 'question']
 
 
 class OrderingItemSerializer(serializers.ModelSerializer):
@@ -24,8 +25,7 @@ class OrderingItemSerializer(serializers.ModelSerializer):
 
 class QuestionSerializer(serializers.ModelSerializer):
     choices = MCQSerializer(many=True, required=False)
-
-
+    matching_pairs = MatchingPairSerializer(many=True, required=False)
     class Meta:
         model = Question
         fields = [
@@ -36,6 +36,7 @@ class QuestionSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         question_type = validated_data.get('question_type')
         choices_data = validated_data.pop('choices', [])
+        matching_pairs_data = validated_data.pop('matching_pairs', [])
         validated_data['quiz'] = Quiz.objects.get(id=3)
         question = Question.objects.create(**validated_data)
 
@@ -50,14 +51,21 @@ class QuestionSerializer(serializers.ModelSerializer):
                     question.delete()
                     raise serializers.ValidationError("Invalid choice data.")
 
+        elif question_type == Question.MATCHING:
+            print(f"Matching Pairs Data: {matching_pairs_data}")
+            for pair_data in matching_pairs_data:
+                pair_data['question'] = question
+                print(f"{pair_data['item']} -> {pair_data['match']}")
+                print(f"Creating Matching Pair with data:\n{pair_data}")
+                MatchingPair.objects.create(**pair_data)
 
-        if not question.validate_choices():
-            question.delete()
-            raise serializers.ValidationError("Each question must have exactly 4 choices.")
+        # if not question.validate_choices():
+        #     question.delete()
+        #     raise serializers.ValidationError("Each question must have exactly 4 choices.")
         
-        if not question.validate_correct_answer():
-            question.delete()
-            raise serializers.ValidationError("At least one choice must be marked as correct.")
+        # if not question.validate_correct_answer():
+        #     question.delete()
+        #     raise serializers.ValidationError("At least one choice must be marked as correct.")
 
         return question
 
