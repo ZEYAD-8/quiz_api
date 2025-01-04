@@ -33,15 +33,15 @@ class Question(models.Model):
     tf_correct_answer = models.BooleanField(default=False)
 
     def validate_choices(self):
+        if self.question_type != Question.MULTIPLE_CHOICE:
+            return True
+
         choices_count = self.choices.count()
         if choices_count != 4:
             raise ValueError("Each question must have exactly 4 choices.")
-        return True
+        if self.choices.filter(is_correct=True).count() != 1:
+            raise ValueError("Exactly one choice must be marked as correct.")
 
-    def validate_correct_answer(self):
-        correct_count = self.choices.filter(is_correct=True).count()
-        if correct_count == 0:
-            raise ValueError("At least one choice must be marked as correct.")
         return True
 
     def __str__(self):

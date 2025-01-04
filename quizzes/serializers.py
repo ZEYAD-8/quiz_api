@@ -41,6 +41,13 @@ class QuestionSerializer(serializers.ModelSerializer):
         matching_pairs_data = validated_data.pop('matching_pairs', [])
         ordering_items_data = validated_data.pop('ordering_items', [])
 
+        if question_type == Question.MULTIPLE_CHOICE and not choices_data:
+            raise serializers.ValidationError("At least one choice is required for multiple-choice questions.")
+        elif question_type == Question.MATCHING and not matching_pairs_data:
+            raise serializers.ValidationError("At least one pair is required for matching questions.")
+        elif question_type == Question.ORDERING and not ordering_items_data:
+            raise serializers.ValidationError("At least one item is required for ordering questions.")
+
         validated_data['quiz'] = Quiz.objects.get(id=3)
         question = Question.objects.create(**validated_data)
 
@@ -74,13 +81,9 @@ class QuestionSerializer(serializers.ModelSerializer):
                     question.delete()
                     raise serializers.ValidationError("Invalid ordering item data.")
 
-        # if not question.validate_choices():
-        #     question.delete()
-        #     raise serializers.ValidationError("Each question must have exactly 4 choices.")
-        
-        # if not question.validate_correct_answer():
-        #     question.delete()
-        #     raise serializers.ValidationError("At least one choice must be marked as correct.")
+        if not question.validate_choices():
+            question.delete()
+            raise serializers.ValidationError("Invalid choices for multiple-choice question.")
 
         return question
 
