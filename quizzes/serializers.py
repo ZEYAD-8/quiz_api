@@ -48,7 +48,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         elif question_type == Question.ORDERING and not ordering_items_data:
             raise serializers.ValidationError("At least one item is required for ordering questions.")
 
-        validated_data['quiz'] = Quiz.objects.get(id=3)
+        # validated_data['quiz'] = Quiz.objects.get(id=3)
         question = Question.objects.create(**validated_data)
 
         if question_type == Question.MULTIPLE_CHOICE:
@@ -87,7 +87,42 @@ class QuestionSerializer(serializers.ModelSerializer):
 
         return question
 
+    def update(self, instance, validated_data):
+        instance.text = validated_data.get('text', instance.text)
+        instance.question_type = validated_data.get('question_type', instance.question_type)
+        instance.tf_correct_answer = validated_data.get('tf_correct_answer', instance.tf_correct_answer)
+        instance.save()
 
+        if instance.question_type == Question.MULTIPLE_CHOICE:
+            choices_data = validated_data.get('choices')
+            if choices_data is not None:
+                self.update_nested(instance, 'choices', MCQ, choices_data)
+
+        if instance.question_type == Question.MATCHING:
+            matching_pairs_data = validated_data.get('matching_pairs')
+            if matching_pairs_data is not None:
+                self.update_nested(instance, 'matching_pairs', MatchingPair, matching_pairs_data)
+
+        if instance.question_type == Question.ORDERING:
+            ordering_items_data = validated_data.get('ordering_items')
+            if ordering_items_data is not None:
+                self.update_nested(instance, 'ordering_items', OrderingItem, ordering_items_data)
+
+        return instance
+
+    def update_nested(self, question, related_name, model_class, data):
+        field_name = getattr(question, related_name)
+
+        existing_items = {}
+        for item in field_name.all():
+            existing_items[item.id] = item
+
+        for item_data in data:
+            item_data['question'] = question
+            model_class.objects.create(**item_data)
+
+        for item_id in existing_items.keys():
+            existing_items[item_id].delete()
 
 
 # A quiz serializer that includes the questions

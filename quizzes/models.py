@@ -27,7 +27,7 @@ class Question(models.Model):
         (ORDERING, 'Ordering'),
     ]
 
-    quiz = models.ForeignKey('Quiz', related_name='questions', on_delete=models.CASCADE)
+    # quiz = models.ForeignKey('Quiz', related_name='questions', on_delete=models.CASCADE)
     text = models.CharField(max_length=500)
     question_type = models.CharField(max_length=2, choices=QUESTION_TYPES, default=MULTIPLE_CHOICE)
     tf_correct_answer = models.BooleanField(default=False)
@@ -41,7 +41,7 @@ class Question(models.Model):
         return True
 
     def __str__(self):
-        return f"Question with id: {self.id} for quiz with id: {self.quiz.id}"
+        return f"Question: {self.id}"
 
 class MCQ(models.Model):
     question = models.ForeignKey('Question', related_name='choices', on_delete=models.CASCADE)
@@ -49,7 +49,7 @@ class MCQ(models.Model):
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"MCQ choice: {self.text} with id: {self.id} for question: {self.question.text}"
+        return f"MCQ choice: {self.id} for question: {self.question.id}"
 
 class MatchingPair(models.Model):
     question = models.ForeignKey('Question', related_name='matching_pairs', on_delete=models.CASCADE)
@@ -57,7 +57,7 @@ class MatchingPair(models.Model):
     match = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"Matching Pair: {self.item} -> {self.match} For Question: {self.question.text}"
+        return f"Matching Pair: {self.id} For Question: {self.question.id}"
 
 class OrderingItem(models.Model):
     question = models.ForeignKey('Question', related_name='ordering_items', on_delete=models.CASCADE)
@@ -65,4 +65,4 @@ class OrderingItem(models.Model):
     order = models.PositiveIntegerField()
 
     def __str__(self):
-        return f"Order item: {self.text} ({self.order}) for question: {self.question.text}"
+        return f"Order item: {self.id} for question: {self.question.id}"
