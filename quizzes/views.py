@@ -7,7 +7,6 @@ from rest_framework.permissions import IsAuthenticated
 from users.premissions import IsCreator
 
 
-
 class QuestionDetailView(APIView):
     def get_object(self, question_id):
         try:
@@ -30,7 +29,7 @@ class QuestionDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = QuestionSerializer(data=request.data)
+        serializer = QuestionSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -44,7 +43,7 @@ class QuestionDetailView(APIView):
                 {"detail": "Question not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
-        serializer = QuestionSerializer(question, data=request.data)
+        serializer = QuestionSerializer(question, data=request.data, context={'request': request})
 
         if serializer.is_valid():
             serializer.save()

@@ -28,6 +28,9 @@ class QuestionSerializer(serializers.ModelSerializer):
     choices = MCQSerializer(many=True, required=False)
     matching_pairs = MatchingPairSerializer(many=True, required=False)
     ordering_items = OrderingItemSerializer(many=True, required=False)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    quizzes = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=Quiz.objects.all())
+
     class Meta:
         model = Question
         fields = [
@@ -40,6 +43,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         choices_data = validated_data.pop('choices', [])
         matching_pairs_data = validated_data.pop('matching_pairs', [])
         ordering_items_data = validated_data.pop('ordering_items', [])
+        quizzes = validated_data.pop('quizzes', [])
 
         if question_type == Question.MULTIPLE_CHOICE and not choices_data:
             raise serializers.ValidationError("At least one choice is required for multiple-choice questions.")
@@ -48,6 +52,8 @@ class QuestionSerializer(serializers.ModelSerializer):
         elif question_type == Question.ORDERING and not ordering_items_data:
             raise serializers.ValidationError("At least one item is required for ordering questions.")
 
+        user = self.context['request'].user
+        validated_data['user'] = user
         question = Question.objects.create(**validated_data)
 
         if question_type == Question.MULTIPLE_CHOICE:
@@ -80,6 +86,9 @@ class QuestionSerializer(serializers.ModelSerializer):
                     question.delete()
                     raise serializers.ValidationError("Invalid ordering item data.")
 
+        if quizzes:
+            question.quizzes.set(quizzes)
+
         if not question.validate_choices():
             question.delete()
             raise serializers.ValidationError("Invalid choices for multiple-choice question.")
@@ -90,6 +99,12 @@ class QuestionSerializer(serializers.ModelSerializer):
         instance.text = validated_data.get('text', instance.text)
         instance.question_type = validated_data.get('question_type', instance.question_type)
         instance.tf_correct_answer = validated_data.get('tf_correct_answer', instance.tf_correct_answer)
+        instance.category = validated_data.get('category', instance.category)
+
+        quizzes = validated_data.pop('quizzes', None)
+        if quizzes is not None:
+            instance.quizzes.set(quizzes)
+
         instance.save()
 
         if instance.question_type == Question.MULTIPLE_CHOICE:
