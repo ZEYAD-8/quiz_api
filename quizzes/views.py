@@ -93,7 +93,6 @@ class QuizHandlerView(APIView):
         except Quiz.DoesNotExist:
             return None
 
-    @csrf_exempt
     def post(self, request):
         print("POST")
         self.check_permissions(request)
