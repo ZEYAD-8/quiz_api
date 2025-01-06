@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import UserCustom
+from categories.models import Category
 
 class Quiz(models.Model):
     title = models.CharField(max_length=255, default='No title available')
@@ -9,6 +10,8 @@ class Quiz(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     user = models.ForeignKey(UserCustom, related_name='quizzes', on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name='quizzes', on_delete=models.CASCADE)
+    questions = models.ManyToManyField('Question', related_name='quizzes', blank=True)
 
     def __str__(self):
         return f"Quiz: {self.title} with id: {self.id}"

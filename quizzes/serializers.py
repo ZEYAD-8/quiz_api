@@ -127,25 +127,17 @@ class QuestionSerializer(serializers.ModelSerializer):
 
 # A quiz serializer that includes the questions
 class QuizSerializer(serializers.ModelSerializer):
-    # questions = QuestionSerializer(many=True, read_only=True)
-    questions = QuestionSerializer(many=True)
+    questions = QuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Quiz
-        fields = ['id', 'title', 'description', 'created_at', 'updated_at', 'questions']
+        fields = ['id', 'title', 'description', 'category', 'created_at', 'updated_at', 'questions']
 
 
     def validate(self, data):
-        # Ensure there are questions
         questions_data = data.get('questions', [])
         if not questions_data:
             raise serializers.ValidationError("At least one question is required.")
-
-        # Validate each question but don't save yet
-        for question_data in questions_data:
-            question_serializer = QuestionSerializer(data=question_data)
-            if not question_serializer.is_valid():
-                raise serializers.ValidationError(f"Invalid question data: {question_serializer.errors}")
 
         return data
 
@@ -153,15 +145,21 @@ class QuizSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = self.context['request'].user
         validated_data['user'] = user
-    
-        # Extract questions data from the input
-        questions_data = validated_data.pop('questions', [])
-        
-        # Create the quiz instance
+
+        questions = validated_data.pop('questions', [])
         quiz = Quiz.objects.create(**validated_data)
-        
-        for question_data in questions_data:
-            question_data['quiz'] = quiz
-            QuestionSerializer().create(validated_data=question_data)
-        
+        quiz.questions.set(questions)
+
         return quiz
+
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.description = validated_data.get('description', instance.description)
+        instance.description = validated_data.get('category', instance.category)
+        instance.save()
+
+        questions = validated_data.pop('questions', [])
+        instance.questions.set(questions)
+
+        return instance
