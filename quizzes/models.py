@@ -30,10 +30,12 @@ class Question(models.Model):
         (ORDERING, 'Ordering'),
     ]
 
-    # quiz = models.ForeignKey('Quiz', related_name='questions', on_delete=models.CASCADE)
     text = models.CharField(max_length=500)
     question_type = models.CharField(max_length=2, choices=QUESTION_TYPES, default=MULTIPLE_CHOICE)
     tf_correct_answer = models.BooleanField(default=False)
+
+    user = models.ForeignKey(UserCustom, related_name='questions', on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name='questions', on_delete=models.CASCADE)
 
     def validate_choices(self):
         if self.question_type == Question.MULTIPLE_CHOICE and \
