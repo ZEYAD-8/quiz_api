@@ -31,8 +31,8 @@ class QuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Question
         fields = [
-            'id', 'text', 'question_type', 'tf_correct_answer', 
-            'choices', 'matching_pairs', 'ordering_items'
+            'id', 'text', 'question_type', 'tf_correct_answer', 'user', 'category',
+            'choices', 'matching_pairs', 'ordering_items', 'quizzes'
         ]
 
     def create(self, validated_data):
@@ -48,7 +48,6 @@ class QuestionSerializer(serializers.ModelSerializer):
         elif question_type == Question.ORDERING and not ordering_items_data:
             raise serializers.ValidationError("At least one item is required for ordering questions.")
 
-        # validated_data['quiz'] = Quiz.objects.get(id=3)
         question = Question.objects.create(**validated_data)
 
         if question_type == Question.MULTIPLE_CHOICE:
