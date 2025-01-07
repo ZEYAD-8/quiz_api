@@ -3,24 +3,21 @@ from .models import Quiz, Question, MCQ, MatchingPair, OrderingItem
 
 # A serializer for each type of question (MCQ, MatchingPair, OrderingItem)
 class MCQSerializer(serializers.ModelSerializer):
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all(), required=False)
     class Meta:
         model = MCQ
-        fields = ['id', 'text', 'is_correct', 'question']
+        fields = ['id', 'text', 'is_correct']
 
 
 class MatchingPairSerializer(serializers.ModelSerializer):
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all(), required=False)
     class Meta:
         model = MatchingPair
-        fields = ['id', 'item', 'match', 'question']
+        fields = ['id', 'item', 'match']
 
 
 class OrderingItemSerializer(serializers.ModelSerializer):
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all(), required=False)
     class Meta:
         model = OrderingItem
-        fields = ['id', 'text', 'order', 'question']
+        fields = ['id', 'text', 'order']
 
 
 

@@ -14,7 +14,7 @@ class Quiz(models.Model):
     questions = models.ManyToManyField('Question', related_name='quizzes', blank=True)
 
     def __str__(self):
-        return f"Quiz: {self.title} with id: {self.id}"
+        return f"Quiz: {self.id} from user: {self.user.id} in category: {self.category.name}"
 
 
 class Question(models.Model):
@@ -62,7 +62,7 @@ class MatchingPair(models.Model):
     match = models.CharField(max_length=255)
 
     def __str__(self):
-        return f"Matching Pair: {self.id} For Question: {self.question.id}"
+        return f"Matching Pair: {self.id} for Question: {self.question.id}"
 
 class OrderingItem(models.Model):
     question = models.ForeignKey('Question', related_name='ordering_items', on_delete=models.CASCADE)
