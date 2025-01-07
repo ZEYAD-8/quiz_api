@@ -36,27 +36,41 @@ class QuestionFilterView(APIView):
         serializer = QuestionSerializer(questions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class QuestionRandomView(APIView):
 
-class QuestionDetailView(APIView):
+    def get(self, request, limit=1):
+        questions = Question.objects.order_by('?')[:limit]
+        serializer = QuestionSerializer(questions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class QuestionHandlerView(APIView):
+
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'DELETE']:
+            print("POST, PUT, DELETE")
+            return [IsAuthenticated(), IsCreator()]
+        return []
+
     def get_object(self, question_id):
         try:
             return Question.objects.get(id=question_id)
         except Question.DoesNotExist:
             return None
 
-    def get(self, request, question_id=None, limit=1):
-        if question_id:
-            question = self.get_object(question_id)
-            if question is None:
-                return Response(
-                    {"detail": "Question not found."},
-                    status=status.HTTP_404_NOT_FOUND
-                )
-            serializer = QuestionSerializer(question)
-        else:
-            questions = Question.objects.order_by('?')[:limit]
-            serializer = QuestionSerializer(questions, many=True)
+    def get(self, request, question_id=None):
+        if question_id is None:
+            return Response(
+                {"detail": "Question ID not provided."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        question = self.get_object(question_id)
+        if question is None:
+            return Response(
+                {"detail": "Question not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = QuestionSerializer(question)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -67,7 +81,7 @@ class QuestionDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    def put(self, request, question_id):
+    def put(self, request, question_id=None):
         question = self.get_object(question_id)
         if question is None:
             return Response(
@@ -95,13 +109,12 @@ class QuestionDetailView(APIView):
             status=status.HTTP_204_NO_CONTENT
         )
 
+class QuizRandomView(APIView):
 
-class QuizListView(APIView):
-    def get(self, request):
-        quizzes = Quiz.objects.all()
+    def get(self, request, limit=1):
+        quizzes = Quiz.objects.order_by('?')[:limit]
         serializer = QuizSerializer(quizzes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class QuizHandlerView(APIView):
 
@@ -117,16 +130,6 @@ class QuizHandlerView(APIView):
         except Quiz.DoesNotExist:
             return None
 
-    def post(self, request):
-        print("POST")
-        self.check_permissions(request)
-        serializer = QuizSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
     def get(self, request, quiz_id=None):
         if quiz_id == None:
             quiz = Quiz.objects.order_by('?').first()
@@ -140,6 +143,14 @@ class QuizHandlerView(APIView):
 
         serializer = QuizSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        self.check_permissions(request)
+        serializer = QuizSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, quiz_id):
         self.check_permissions(request)
@@ -172,3 +183,27 @@ class QuizHandlerView(APIView):
             {"detail": "Quiz deleted successfully."},
             status=status.HTTP_204_NO_CONTENT
         )
+
+class QuizFilterView(APIView):
+
+    def get(self, request, category=None, ordering=None, limit=None):
+        filters = {}
+
+        category = request.query_params.get('category') or category
+        if isinstance(category, int):
+            filters['category__id'] = category
+        if isinstance(category, str):
+            filters['category__slug__iexact'] = category
+
+        quizzes = Quiz.objects.filter(**filters)
+
+        ordering = request.query_params.get('ordering') or ordering
+        if ordering:
+            quizzes = quizzes.order_by(ordering)
+
+        limit = request.query_params.get('limit') or limit
+        if limit and int(limit) > 0:
+            quizzes = quizzes[:int(limit)]
+
+        serializer = QuizSerializer(quizzes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
