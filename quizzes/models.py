@@ -30,9 +30,17 @@ class Question(models.Model):
         (ORDERING, 'Ordering'),
     ]
 
+    DIFFICULTY_CHOICES = [
+        (0, "Not rated"),
+        (1, "Easy"),
+        (2, "Medium"),
+        (3, "Hard"),
+    ]
+
     text = models.CharField(max_length=500)
     question_type = models.CharField(max_length=2, choices=QUESTION_TYPES, default=MULTIPLE_CHOICE)
     tf_correct_answer = models.BooleanField(default=False)
+    difficulty = models.IntegerField(choices=DIFFICULTY_CHOICES, default=0)
     explanation = models.TextField(max_length=500, null=True, blank=True)
 
     user = models.ForeignKey(UserCustom, related_name='questions', on_delete=models.CASCADE)

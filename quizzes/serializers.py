@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Quiz, Question, MCQ, MatchingPair, OrderingItem
-
+from categories.models import Category
 # A serializer for each type of question (MCQ, MatchingPair, OrderingItem)
 class MCQSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,18 +28,42 @@ class QuestionSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     quizzes = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=Quiz.objects.all())
     category = serializers.SerializerMethodField()
+    difficulty = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
         fields = [
             'id', 'text', 'question_type', 'tf_correct_answer', 'user', 'category',
-            'choices', 'matching_pairs', 'ordering_items', 'quizzes', 'explanation'
+            'choices', 'matching_pairs', 'ordering_items', 'quizzes', 'explanation', 'difficulty'
         ]
 
     def get_category(self, obj):
         if obj.category:
             return {"id": obj.category.id, "name": obj.category.name, "slug": obj.category.slug}
         return None
+
+    def get_difficulty(self, obj):
+        return obj.get_difficulty_display()
+
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+
+        difficulty = self.initial_data.get('difficulty')
+        if difficulty:
+            difficulty_map = {string: number for number, string in Question.DIFFICULTY_CHOICES}
+
+            if isinstance(difficulty, str) and difficulty in difficulty_map.keys():
+                data['difficulty'] = difficulty_map[difficulty]
+            elif isinstance(difficulty, int) and difficulty in difficulty_map.values():
+                data['difficulty'] = difficulty
+            else:
+                raise serializers.ValidationError(
+                        {"difficulty": f"Invalid difficulty '{difficulty}'",
+                        "Valid options": difficulty_map}
+                )
+
+        return data
+
 
     def create(self, validated_data):
         question_type = validated_data.get('question_type')
@@ -104,6 +128,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         instance.tf_correct_answer = validated_data.get('tf_correct_answer', instance.tf_correct_answer)
         instance.category = validated_data.get('category', instance.category)
         instance.explanation = validated_data.get('explanation', instance.explanation)
+        instance.difficulty = validated_data.get('difficulty', instance.difficulty)
 
         quizzes = validated_data.pop('quizzes', None)
         if quizzes is not None:
