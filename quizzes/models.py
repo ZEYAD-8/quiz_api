@@ -18,6 +18,10 @@ class Quiz(models.Model):
 
 
 class Question(models.Model):
+
+    class Meta:
+        ordering = ['difficulty']
+
     MULTIPLE_CHOICE = 'MC'
     TRUE_FALSE = 'TF'
     MATCHING = 'MT'

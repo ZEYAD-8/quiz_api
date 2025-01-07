@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import QuizListView, QuizHandlerView
 #from .views import QuestionCreateView, QuestionListView, QuestionDetailView
-from .views import QuestionDetailView
+from .views import QuestionDetailView, QuestionRandomView, QuestionFilterView
 
 urlpatterns = [
     path('quizzes/', QuizListView.as_view(), name='quiz-list'),
@@ -18,8 +18,11 @@ urlpatterns = [
     path('questions/<int:question_id>/delete/', QuestionDetailView.as_view(), name='question-delete'),
 
     path('questions/random/', QuestionDetailView.as_view(), name='question-random'),
-    # path('questions/random/<int:limit>/', QuestionDetailView.as_view(), name='question-random'),
+    path('questions/random/<int:limit>/', QuestionDetailView.as_view(), name='question-random'),
 
-
-    # path('questions/<str:category>/', QuestionCategoriesView.as_view(), name='question-categories'),
+    path('questions/', QuestionFilterView.as_view(), name='question-filter'),
+    path('questions/<str:category>/', QuestionFilterView.as_view(), name='question-filter-categories'),
+    path('questions/<str:category>/<str:difficulty>/', QuestionFilterView.as_view(), name='question-filter-difficulty'),
+    path('questions/<str:category>/<str:difficulty>/<str:ordering>/', QuestionFilterView.as_view(), name='question-filter-ordering'),
+    path('questions/<str:category>/<str:difficulty>/<str:ordering>/<int:limit>/', QuestionFilterView.as_view(), name='question-filter-limit'),
 ]
