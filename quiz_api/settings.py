@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'quizzes',
     'users',
     'categories',
+    'questions',
 ]
 
 MIDDLEWARE = [

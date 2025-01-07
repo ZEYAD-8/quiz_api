@@ -4,7 +4,9 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from .serializers import UserCustomSerializer, UserRegistrationSerializer
 from rest_framework.authtoken.models import Token
-from quizzes.serializers import QuizSerializer, QuestionSerializer
+from quizzes.serializers import QuizSerializer
+from questions.serializers import QuestionSerializer
+
 
 class RegisterUserView(APIView):
     permission_classes = []
