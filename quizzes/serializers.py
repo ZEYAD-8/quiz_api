@@ -178,14 +178,13 @@ class QuestionSerializer(serializers.ModelSerializer):
         for item_id in existing_items.keys():
             existing_items[item_id].delete()
 
-
-
 class QuizSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True)
     category = serializers.SerializerMethodField()
+    number_of_questions = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Quiz
-        fields = ['id', 'title', 'description', 'category', 'questions']
+        fields = ['id', 'title', 'description', 'category', 'number_of_questions', 'questions']
 
 
     def validate(self, data):
@@ -199,6 +198,9 @@ class QuizSerializer(serializers.ModelSerializer):
         if obj.category:
             return {"id": obj.category.id, "name": obj.category.name, "slug": obj.category.slug}
         return None
+
+    def get_number_of_questions(self, obj):
+        return obj.questions.count()
 
     def to_internal_value(self, data):
         data = super().to_internal_value(data)
