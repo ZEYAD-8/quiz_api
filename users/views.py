@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from .serializers import UserCustomSerializer, UserRegistrationSerializer
 from rest_framework.authtoken.models import Token
+from quizzes.serializers import QuizSerializer, QuestionSerializer
 
 class RegisterUserView(APIView):
     permission_classes = []
@@ -50,12 +51,18 @@ class UserProfileView(APIView):
 
     def get(self, request):
         user = request.user
-        info = {
-            'id': user.id,
-            'email': user.email,
-            'is_creator': user.is_creator,
-            'is_admin': user.is_admin,
-        }
-        if user.is_creator:
-            info['created_quizzes'] = [quiz.title for quiz in user.created_quizzes()]
-        return Response(info, status=status.HTTP_200_OK)
+        return Response(UserCustomSerializer(user).data, status=status.HTTP_200_OK)
+
+class UserCreatedQuizzesView(APIView):
+
+    def get(self, request):
+        user = request.user
+        quizzes = user.created_quizzes()
+        return Response(QuizSerializer(quizzes, many=True).data, status=status.HTTP_200_OK)
+
+class UserCreatedQuestionsView(APIView):
+    
+    def get(self, request):
+        user = request.user
+        questions = user.created_questions()
+        return Response(QuestionSerializer(questions, many=True).data, status=status.HTTP_200_OK)

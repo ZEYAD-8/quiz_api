@@ -24,6 +24,9 @@ class UserCustom(AbstractUser):
 
     def created_quizzes(self):
         return self.quizzes.all()
+    
+    def created_questions(self):
+        return self.questions.all()
 
     def __str__(self):
         return f"User with ID: {self.id} and email: {self.email}"
