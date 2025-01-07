@@ -33,6 +33,7 @@ class Question(models.Model):
     text = models.CharField(max_length=500)
     question_type = models.CharField(max_length=2, choices=QUESTION_TYPES, default=MULTIPLE_CHOICE)
     tf_correct_answer = models.BooleanField(default=False)
+    explanation = models.TextField(max_length=500, null=True, blank=True)
 
     user = models.ForeignKey(UserCustom, related_name='questions', on_delete=models.CASCADE)
     category = models.ForeignKey(Category, related_name='questions', on_delete=models.CASCADE)

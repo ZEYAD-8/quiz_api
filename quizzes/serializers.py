@@ -33,7 +33,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = [
             'id', 'text', 'question_type', 'tf_correct_answer', 'user', 'category',
-            'choices', 'matching_pairs', 'ordering_items', 'quizzes'
+            'choices', 'matching_pairs', 'ordering_items', 'quizzes', 'explanation'
         ]
 
     def get_category(self, obj):
@@ -103,6 +103,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         instance.question_type = validated_data.get('question_type', instance.question_type)
         instance.tf_correct_answer = validated_data.get('tf_correct_answer', instance.tf_correct_answer)
         instance.category = validated_data.get('category', instance.category)
+        instance.explanation = validated_data.get('explanation', instance.explanation)
 
         quizzes = validated_data.pop('quizzes', None)
         if quizzes is not None:
