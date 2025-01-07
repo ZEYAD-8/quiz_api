@@ -47,6 +47,20 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     def to_internal_value(self, data):
         data = super().to_internal_value(data)
+        category = self.initial_data.get("category")
+        if category:
+            if isinstance(category, int):
+                try:
+                    data['category'] = Category.objects.get(id=category)
+                except Category.DoesNotExist:
+                    raise serializers.ValidationError({"category": "Invalid category ID."})
+            elif isinstance(category, str):
+                try:
+                    data['category'] = Category.objects.get(slug__iexact=category)
+                except Category.DoesNotExist:
+                    raise serializers.ValidationError({"category": "Invalid category slug."})
+            else:
+                raise serializers.ValidationError({"category": "Invalid category identifier. Should be an integer or a string."})
 
         difficulty = self.initial_data.get('difficulty')
         if difficulty:
@@ -58,7 +72,7 @@ class QuestionSerializer(serializers.ModelSerializer):
                 data['difficulty'] = difficulty
             else:
                 raise serializers.ValidationError(
-                        {"difficulty": f"Invalid difficulty '{difficulty}'",
+                        {"difficulty": f"Invalid difficulty '{difficulty}'. Should be an integer or a string.",
                         "Valid options": difficulty_map}
                 )
 
