@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Quiz, Question, MCQ, MatchingPair, OrderingItem
 from categories.models import Category
-# A serializer for each type of question (MCQ, MatchingPair, OrderingItem)
+
 class MCQSerializer(serializers.ModelSerializer):
     class Meta:
         model = MCQ
@@ -20,22 +20,19 @@ class OrderingItemSerializer(serializers.ModelSerializer):
         fields = ['text', 'order']
 
 
-## To do:
-# _Remove quizzes from QuestionSerializer
 class QuestionSerializer(serializers.ModelSerializer):
     choices = MCQSerializer(many=True, required=False)
     matching_pairs = MatchingPairSerializer(many=True, required=False)
     ordering_items = OrderingItemSerializer(many=True, required=False)
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
-    quizzes = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=Quiz.objects.all())
+    quizzes = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=Quiz.objects.all(), write_only=True)
     category = serializers.SerializerMethodField()
     difficulty = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
         fields = [
-            'id', 'text', 'question_type', 'tf_correct_answer', 'user', 'category',
-            'choices', 'matching_pairs', 'ordering_items', 'quizzes', 'explanation', 'difficulty'
+            'id', 'text', 'question_type', 'choices', 'matching_pairs', 'ordering_items', 
+            'tf_correct_answer', 'category', 'explanation', 'difficulty', 'quizzes'
         ]
 
     def get_category(self, obj):
