@@ -95,12 +95,6 @@ class QuestionDetailView(APIView):
             status=status.HTTP_204_NO_CONTENT
         )
 
-class QuestionRandomView(APIView):
-    def get(self, request, limit=None):
-        questions = Question.objects.order_by('?')[:limit]
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 class QuizListView(APIView):
     def get(self, request):
@@ -133,7 +127,7 @@ class QuizHandlerView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-    def get(self, request, quiz_id):
+    def get(self, request, quiz_id=None):
         if quiz_id == None:
             quiz = Quiz.objects.order_by('?').first()
         else:

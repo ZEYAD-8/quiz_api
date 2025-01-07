@@ -20,7 +20,8 @@ class OrderingItemSerializer(serializers.ModelSerializer):
         fields = ['text', 'order']
 
 
-
+## To do:
+# _Remove quizzes from QuestionSerializer
 class QuestionSerializer(serializers.ModelSerializer):
     choices = MCQSerializer(many=True, required=False)
     matching_pairs = MatchingPairSerializer(many=True, required=False)
@@ -77,7 +78,6 @@ class QuestionSerializer(serializers.ModelSerializer):
                 )
 
         return data
-
 
     def create(self, validated_data):
         question_type = validated_data.get('question_type')
@@ -182,13 +182,13 @@ class QuestionSerializer(serializers.ModelSerializer):
             existing_items[item_id].delete()
 
 
-# A quiz serializer that includes the questions
+
 class QuizSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True, read_only=True)
-
+    category = serializers.SerializerMethodField()
     class Meta:
         model = Quiz
-        fields = ['id', 'title', 'description', 'category', 'created_at', 'updated_at', 'questions']
+        fields = ['id', 'title', 'description', 'category', 'questions']
 
 
     def validate(self, data):
@@ -197,6 +197,43 @@ class QuizSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("At least one question is required.")
 
         return data
+
+    def get_category(self, obj):
+        if obj.category:
+            return {"id": obj.category.id, "name": obj.category.name, "slug": obj.category.slug}
+        return None
+
+    def to_internal_value(self, data):
+        data = super().to_internal_value(data)
+
+        # questions will be an array of question IDs
+        questions = self.initial_data.get('questions', [])
+        data['questions'] = []
+        for question_id in questions:
+            try:
+                question = Question.objects.get(id=question_id)
+                data['questions'].append(question)
+            except Question.DoesNotExist:
+                raise serializers.ValidationError({"questions": f"Question with ID {question_id} does not exist."})
+
+
+        category = self.initial_data.get("category")
+        if category:
+            if isinstance(category, int):
+                try:
+                    data['category'] = Category.objects.get(id=category)
+                except Category.DoesNotExist:
+                    raise serializers.ValidationError({"category": "Invalid category ID."})
+            elif isinstance(category, str):
+                try:
+                    data['category'] = Category.objects.get(slug__iexact=category)
+                except Category.DoesNotExist:
+                    raise serializers.ValidationError({"category": "Invalid category slug."})
+            else:
+                raise serializers.ValidationError({"category": "Invalid category identifier. Should be an integer or a string."})
+
+        return data
+
 
 
     def create(self, validated_data):
@@ -213,7 +250,7 @@ class QuizSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
         instance.description = validated_data.get('description', instance.description)
-        instance.description = validated_data.get('category', instance.category)
+        instance.category = validated_data.get('category', instance.category)
         instance.save()
 
         questions = validated_data.pop('questions', [])
