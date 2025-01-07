@@ -27,6 +27,7 @@ class QuestionSerializer(serializers.ModelSerializer):
     ordering_items = OrderingItemSerializer(many=True, required=False)
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     quizzes = serializers.PrimaryKeyRelatedField(many=True, required=False, queryset=Quiz.objects.all())
+    category = serializers.SerializerMethodField()
 
     class Meta:
         model = Question
@@ -34,6 +35,11 @@ class QuestionSerializer(serializers.ModelSerializer):
             'id', 'text', 'question_type', 'tf_correct_answer', 'user', 'category',
             'choices', 'matching_pairs', 'ordering_items', 'quizzes'
         ]
+
+    def get_category(self, obj):
+        if obj.category:
+            return {"id": obj.category.id, "name": obj.category.name, "slug": obj.category.slug}
+        return None
 
     def create(self, validated_data):
         question_type = validated_data.get('question_type')
