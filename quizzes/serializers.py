@@ -5,19 +5,19 @@ from .models import Quiz, Question, MCQ, MatchingPair, OrderingItem
 class MCQSerializer(serializers.ModelSerializer):
     class Meta:
         model = MCQ
-        fields = ['id', 'text', 'is_correct']
+        fields = ['text', 'is_correct']
 
 
 class MatchingPairSerializer(serializers.ModelSerializer):
     class Meta:
         model = MatchingPair
-        fields = ['id', 'item', 'match']
+        fields = ['item', 'match']
 
 
 class OrderingItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderingItem
-        fields = ['id', 'text', 'order']
+        fields = ['text', 'order']
 
 
 
