@@ -11,7 +11,7 @@ class Category(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Category: {self.name}"
+        return f"Category: {self.name} with id: {self.id}"
     
     def save(self, *args, **kwargs):
         if not self.slug:
