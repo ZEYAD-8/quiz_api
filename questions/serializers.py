@@ -78,19 +78,38 @@ class QuestionSerializer(serializers.ModelSerializer):
 
         return data
 
+    def validate(self, data):
+        category = data.get('category')
+        if not category:
+            raise serializers.ValidationError("Category is required.")
+
+        question_type = data.get('question_type')
+        choices = data.get('choices', [])
+        matching_pairs = data.get('matching_pairs', [])
+        ordering_items = data.get('ordering_items', [])
+
+        if not question_type:
+            raise serializers.ValidationError("Question type is required.")
+        elif question_type not in [Question.MULTIPLE_CHOICE, Question.MATCHING, Question.ORDERING, Question.TRUE_FALSE]:
+            raise serializers.ValidationError("Invalid question type.")
+
+        if question_type == Question.MULTIPLE_CHOICE and not choices:
+            raise serializers.ValidationError("At least one choice is required for multiple-choice questions.")
+        elif question_type == Question.MATCHING and not matching_pairs:
+            raise serializers.ValidationError("At least one pair is required for matching questions.")
+        elif question_type == Question.ORDERING and not ordering_items:
+            raise serializers.ValidationError("At least one item is required for ordering questions.")
+        elif question_type == Question.TRUE_FALSE and data.get('tf_correct_answer', None) is None:
+            raise serializers.ValidationError("True/False questions require a correct answer.")
+
+        return data
+
     def create(self, validated_data):
         question_type = validated_data.get('question_type')
         choices_data = validated_data.pop('choices', [])
         matching_pairs_data = validated_data.pop('matching_pairs', [])
         ordering_items_data = validated_data.pop('ordering_items', [])
         quizzes = validated_data.pop('quizzes', [])
-
-        if question_type == Question.MULTIPLE_CHOICE and not choices_data:
-            raise serializers.ValidationError("At least one choice is required for multiple-choice questions.")
-        elif question_type == Question.MATCHING and not matching_pairs_data:
-            raise serializers.ValidationError("At least one pair is required for matching questions.")
-        elif question_type == Question.ORDERING and not ordering_items_data:
-            raise serializers.ValidationError("At least one item is required for ordering questions.")
 
         user = self.context['request'].user
         validated_data['user'] = user
@@ -102,7 +121,6 @@ class QuestionSerializer(serializers.ModelSerializer):
                     choice_data['question'] = question
                     MCQ.objects.create(**choice_data)
                 except Exception as e:
-                    print(e)
                     question.delete()
                     raise serializers.ValidationError("Invalid choice data.")
 
@@ -112,7 +130,6 @@ class QuestionSerializer(serializers.ModelSerializer):
                     pair_data['question'] = question
                     MatchingPair.objects.create(**pair_data)
                 except Exception as e:
-                    print(e)
                     question.delete()
                     raise serializers.ValidationError("Invalid matching pair data.")
 
@@ -122,7 +139,6 @@ class QuestionSerializer(serializers.ModelSerializer):
                     item_data['question'] = question
                     OrderingItem.objects.create(**item_data)
                 except Exception as e:
-                    print(e)
                     question.delete()
                     raise serializers.ValidationError("Invalid ordering item data.")
 
