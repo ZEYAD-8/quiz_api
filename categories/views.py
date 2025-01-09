@@ -32,19 +32,25 @@ class CategoryDetailView(CategoryGenericView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class CategoryQuizView(CategoryGenericView):
-    def get(self, request, identifier, limit=None):
+    def get(self, request, identifier, limit=25):
         category = self.get_object(identifier)
-        quizzes = category.quizzes.all()
-        if limit:
-            quizzes = quizzes[:int(limit)]
+        if limit <= 0 or limit > 100:
+            return Response(
+                {"detail": "limit must be between 1 and 100."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        quizzes = category.quizzes.all()[:limit]
         serializer = QuizSerializer(quizzes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class CategoryQuestionView(CategoryGenericView):
-    def get(self, request, identifier, limit=None):
+    def get(self, request, identifier, limit=25):
         category = self.get_object(identifier)
-        quizzes = category.questions.all()
-        if limit:
-            quizzes = quizzes[:int(limit)]
+        if limit <= 0 or limit > 100:
+            return Response(
+                {"detail": "limit must be between 1 and 100."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        quizzes = category.questions.all()[:limit]
         serializer = QuestionSerializer(quizzes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
