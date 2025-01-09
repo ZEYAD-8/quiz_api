@@ -101,6 +101,8 @@ class QuizFilterView(APIView):
 
 
 class QuizRandomView(APIView):
+    permission_classes = []
+    authentication_classes = []
 
     def get(self, request, limit=1):
         quizzes = Quiz.objects.order_by('?')[:limit]

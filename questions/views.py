@@ -122,6 +122,8 @@ class QuestionFilterView(APIView):
 
 
 class QuestionRandomView(APIView):
+    permission_classes = []
+    authentication_classes = []
 
     def get(self, request, limit=1):
         if limit <= 0 or limit > 100:
