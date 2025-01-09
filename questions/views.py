@@ -123,7 +123,12 @@ class QuestionFilterView(APIView):
 
 class QuestionRandomView(APIView):
 
-    def get(self, request, limit=3):
+    def get(self, request, limit=1):
+        if limit <= 0 or limit > 100:
+            return Response(
+                {"detail": "limit must be between 1 and 100."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         questions = Question.objects.order_by('?')[:limit]
         serializer = QuestionSerializer(questions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
