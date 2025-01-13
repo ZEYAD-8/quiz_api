@@ -33,7 +33,7 @@ class Question(models.Model):
     explanation = models.TextField(max_length=500, null=True, blank=True)
 
     user = models.ForeignKey(UserCustom, related_name='questions', on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, related_name='questions', on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name='questions', on_delete=models.SET_DEFAULT, default=6) # The "Uncategoried" Category
 
     def validate_choices(self):
         if self.question_type == Question.MULTIPLE_CHOICE and \

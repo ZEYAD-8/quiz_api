@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import CategoryListView, CategoryDetailView, CategoryQuizView, CategoryQuestionView
+from .views import CategoryListView, CategoryQuizView, CategoryQuestionView, CategoryHandlerView
 
 urlpatterns = [
     path('', CategoryListView.as_view(), name='category-list'), # GET
-    path('<str:identifier>/', CategoryDetailView.as_view(), name='category-detail'), # GET
+    path('create/', CategoryHandlerView.as_view(), name='category-create'), # POST
+    path('<str:identifier>/', CategoryHandlerView.as_view(), name='category-detail'), # GET, PUT, DELETE
 
     path('<str:identifier>/quizzes/', CategoryQuizView.as_view(), name='category-quiz-list'), # GET
     path('<str:identifier>/quizzes/<int:limit>/', CategoryQuizView.as_view(), name='category-quiz-list-limit'), # GET
