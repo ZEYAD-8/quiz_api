@@ -4,6 +4,9 @@ from users.models import UserCustom
 
 # Create your models here.
 class Category(models.Model):
+    class Meta:
+        verbose_name_plural = "Categories"
+
     name = models.CharField(max_length=255)
     description = models.TextField(max_length=500)
     slug = models.SlugField(unique=True)
@@ -13,7 +16,7 @@ class Category(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Category: {self.name} with id: {self.id}"
+        return f"[{self.id}] {self.name}"
     
     def save(self, *args, **kwargs):
         if not self.slug:

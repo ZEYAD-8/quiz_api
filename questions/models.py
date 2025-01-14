@@ -47,6 +47,9 @@ class Question(models.Model):
         return f"Question: {self.id}"
 
 class MCQ(models.Model):
+    class Meta:
+        verbose_name_plural = "MCQs"
+
     question = models.ForeignKey('Question', related_name='choices', on_delete=models.CASCADE)
     text = models.CharField(max_length=255, null=True, blank=True)
     is_correct = models.BooleanField(default=False)
@@ -55,6 +58,9 @@ class MCQ(models.Model):
         return f"MCQ choice: {self.id} for question: {self.question.id}"
 
 class MatchingPair(models.Model):
+    class Meta:
+        verbose_name_plural = "Matching Pairs"
+
     question = models.ForeignKey('Question', related_name='matching_pairs', on_delete=models.CASCADE)
     item = models.CharField(max_length=255)
     match = models.CharField(max_length=255)
@@ -63,6 +69,9 @@ class MatchingPair(models.Model):
         return f"Matching Pair: {self.id} for Question: {self.question.id}"
 
 class OrderingItem(models.Model):
+    class Meta:
+        verbose_name_plural = "Ordering Items"
+
     question = models.ForeignKey('Question', related_name='ordering_items', on_delete=models.CASCADE)
     text = models.CharField(max_length=255)
     order = models.PositiveIntegerField()

@@ -46,14 +46,7 @@ class UserCustom(AbstractUser):
     
     def created_questions(self):
         return self.questions.all()
-    
-    def create_super_user(self):
-        self.is_admin = True
-        self.is_staff = True
-        self.is_superuser = True
-        self.save()
 
     def __str__(self):
-        return f"User with ID: {self.id} and email: {self.email}"
-
+        return f"[{self.id}] {self.email}"
 

@@ -4,6 +4,9 @@ from categories.models import Category
 from questions.models import Question
 
 class Quiz(models.Model):
+    class Meta:
+        verbose_name_plural = "Quizzes"
+
     title = models.CharField(max_length=255, default='No title available')
     description = models.TextField(default='No description available', max_length=500)
 
