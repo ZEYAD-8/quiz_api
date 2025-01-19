@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import dj_database_url
+import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -78,6 +81,7 @@ WSGI_APPLICATION = 'quiz_api.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# for local development
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -85,15 +89,22 @@ WSGI_APPLICATION = 'quiz_api.wsgi.application'
 #     }
 # }
 
+# for local development
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': config('DATABASE_NAME'),
+#         'USER': config('DATABASE_USER'),
+#         'PASSWORD': config('DATABASE_PASSWORD'),
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
+
+# For railway deployment
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DATABASE_NAME'),
-        'USER': config('DATABASE_USER'),
-        'PASSWORD': config('DATABASE_PASSWORD'),
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
 # Password validation
