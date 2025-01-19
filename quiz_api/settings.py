@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-t6)2y#!fs%6^lu%rfh@#t8x-1nck(u8$1g*f38ddkavg2*6x%!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "quizapi-production-5cf9.up.railway.app",
