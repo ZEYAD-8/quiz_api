@@ -36,7 +36,13 @@ class QuestionHandlerView(APIView):
         serializer = QuestionSerializer(question)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
+    def post(self, request, question_id=None):
+        if not request.resolver_match.url_name == 'question-create':
+            return Response(
+                {"detail": f'Method "{request.method}" not allowed.'},
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+
         serializer = QuestionSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
