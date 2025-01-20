@@ -5,12 +5,13 @@ from .models import Quiz
 from .serializers import QuizSerializer
 from rest_framework.permissions import IsAuthenticated
 from users.premissions import IsCreator
+from django.http import HttpResponseNotAllowed
+
 
 class QuizHandlerView(APIView):
 
     def get_permissions(self):
         if self.request.method in ['POST', 'PUT', 'DELETE']:
-            print("POST, PUT, DELETE")
             return [IsAuthenticated(), IsCreator()]
         return []
 
@@ -19,6 +20,23 @@ class QuizHandlerView(APIView):
             return Quiz.objects.get(id=quiz_id)
         except Quiz.DoesNotExist:
             return None
+
+    def dispatch(self, request, *args, **kwargs):
+        url_name = request.resolver_match.url_name
+
+        allowed_methods = {
+            "quiz-create": ["POST"],
+            "quiz-detail": ["GET", "PUT", "DELETE"],
+        }
+
+        methods = allowed_methods.get(url_name, [])
+        if request.method not in methods:
+            return HttpResponseNotAllowed(
+                permitted_methods=methods,
+                content=f'Method "{request.method}" not allowed.'
+            )
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, quiz_id=None):
         if quiz_id == None:
@@ -34,7 +52,7 @@ class QuizHandlerView(APIView):
         serializer = QuizSerializer(quiz)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
+    def post(self, request, quiz_id=None):
         self.check_permissions(request)
         serializer = QuizSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():

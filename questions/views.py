@@ -5,6 +5,7 @@ from .models import Question
 from .serializers import QuestionSerializer
 from rest_framework.permissions import IsAuthenticated
 from users.premissions import IsCreator
+from django.http import HttpResponseNotAllowed
 
 
 class QuestionHandlerView(APIView):
@@ -13,6 +14,24 @@ class QuestionHandlerView(APIView):
         if self.request.method in ['POST', 'PUT', 'DELETE']:
             return [IsAuthenticated(), IsCreator()]
         return []
+
+    def dispatch(self, request, *args, **kwargs):
+        url_name = request.resolver_match.url_name
+
+        allowed_methods = {
+            "question-create": ["POST"],
+            "question-detail": ["GET", "PUT", "DELETE"],
+        }
+
+        methods = allowed_methods.get(url_name, [])
+        
+        if request.method not in methods:
+            return HttpResponseNotAllowed(
+                permitted_methods=methods, 
+                content=f'Method "{request.method}" not allowed.'
+            )
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, question_id):
         try:
