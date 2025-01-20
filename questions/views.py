@@ -11,7 +11,6 @@ class QuestionHandlerView(APIView):
 
     def get_permissions(self):
         if self.request.method in ['POST', 'PUT', 'DELETE']:
-            print("POST, PUT, DELETE")
             return [IsAuthenticated(), IsCreator()]
         return []
 
@@ -101,7 +100,7 @@ class QuestionFilterView(APIView):
         if ordering:
             questions = questions.order_by(ordering)
 
-        limit = request.query_params.get('limit', 25)
+        limit = request.query_params.get('limit', 5)
         try:
             limit = int(limit)
         except (ValueError, TypeError):
@@ -119,19 +118,3 @@ class QuestionFilterView(APIView):
 
         serializer = QuestionSerializer(questions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class QuestionRandomView(APIView):
-    permission_classes = []
-    authentication_classes = []
-
-    def get(self, request, limit=1):
-        if limit <= 0 or limit > 100:
-            return Response(
-                {"detail": "limit must be between 1 and 100."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        questions = Question.objects.order_by('?')[:limit]
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
