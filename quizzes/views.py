@@ -95,10 +95,10 @@ class QuizHandlerView(APIView):
 
 class QuizFilterView(APIView):
 
-    def get(self, request, category=None, ordering=None, limit=None):
+    def get(self, request):
         filters = {}
 
-        category = request.query_params.get('category') or category
+        category = request.query_params.get('category', None)
         if isinstance(category, int):
             filters['category__id'] = category
         if isinstance(category, str):
@@ -106,24 +106,28 @@ class QuizFilterView(APIView):
 
         quizzes = Quiz.objects.filter(**filters)
 
-        ordering = request.query_params.get('ordering') or ordering
+        ordering = request.query_params.get('ordering', None)
         if ordering:
             quizzes = quizzes.order_by(ordering)
+        else:
+            quizzes = quizzes.order_by('?')
 
-        limit = request.query_params.get('limit') or limit
-        if limit and int(limit) > 0:
-            quizzes = quizzes[:int(limit)]
+        limit = request.query_params.get('limit', 1)
+        try:
+            limit = int(limit)
+        except (ValueError, TypeError):
+            return Response(
+                {"detail": "Invalid limit value."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        serializer = QuizSerializer(quizzes, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class QuizRandomView(APIView):
-    permission_classes = []
-    authentication_classes = []
-
-    def get(self, request, limit=1):
-        quizzes = Quiz.objects.order_by('?')[:limit]
+        if limit <= 0 or limit > 10:
+            return Response(
+                {"detail": "limit must be between 1 and 10."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        quizzes = quizzes[:limit]
+    
         serializer = QuizSerializer(quizzes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
