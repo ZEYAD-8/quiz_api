@@ -5,8 +5,9 @@ from rest_framework import status
 from .models import Category
 from .serializers import CategorySerializer
 from django.shortcuts import get_object_or_404
-from quizzes.serializers import QuizSerializer
-from quizzes.serializers import QuestionSerializer
+from django.http import HttpResponseNotAllowed
+from rest_framework.permissions import IsAuthenticated
+from users.premissions import IsCreator
 
 # Create your views here.
 class CategoryListView(APIView):
@@ -21,12 +22,34 @@ class CategoryGenericView(APIView):
         # it's eiter a digit (id)
         if identifier.isdigit():
             return get_object_or_404(Category, id=identifier)
-
         # or a slug
         return get_object_or_404(Category, slug__iexact=identifier)
 
 
 class CategoryHandlerView(CategoryGenericView):
+
+    def get_permissions(self):
+        if self.request.method in ['POST', 'PUT', 'DELETE']:
+            return [IsAuthenticated(), IsCreator()]
+        return []
+
+    def dispatch(self, request, *args, **kwargs):
+        url_name = request.resolver_match.url_name
+
+        allowed_methods = {
+            "category-create": ["POST"],
+            "category-detail": ["GET", "PUT", "DELETE"],
+        }
+
+        methods = allowed_methods.get(url_name, [])
+        
+        if request.method not in methods:
+            return HttpResponseNotAllowed(
+                permitted_methods=methods, 
+                content=f'Method "{request.method}" not allowed.'
+            )
+
+        return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, identifier=None):
         category = self.get_object(identifier)
@@ -72,27 +95,3 @@ class CategoryHandlerView(CategoryGenericView):
             {"detail": "Category deleted successfully."},
             status=status.HTTP_204_NO_CONTENT
         )
-
-class CategoryQuizView(CategoryGenericView):
-    def get(self, request, identifier, limit=25):
-        category = self.get_object(identifier)
-        if limit <= 0 or limit > 100:
-            return Response(
-                {"detail": "limit must be between 1 and 100."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        quizzes = category.quizzes.all()[:limit]
-        serializer = QuizSerializer(quizzes, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-class CategoryQuestionView(CategoryGenericView):
-    def get(self, request, identifier, limit=25):
-        category = self.get_object(identifier)
-        if limit <= 0 or limit > 100:
-            return Response(
-                {"detail": "limit must be between 1 and 100."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        quizzes = category.questions.all()[:limit]
-        serializer = QuestionSerializer(quizzes, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
