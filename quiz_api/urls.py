@@ -23,4 +23,5 @@ urlpatterns = [
     path('v1/questions/', include('questions.urls')),
     path('v1/users/', include('users.urls')),
     path('v1/categories/', include('categories.urls')),
+    path('v1/attempt/', include('attempts.urls')),
 ]
