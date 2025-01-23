@@ -94,6 +94,8 @@ class QuizHandlerView(APIView):
 
 
 class QuizFilterView(APIView):
+    def get_permissions(self):
+        return []
 
     def get(self, request):
         filters = {}

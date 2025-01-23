@@ -99,8 +99,8 @@ class QuestionHandlerView(APIView):
 
 
 class QuestionFilterView(APIView):
-    authentication_classes = []
-    presmission_classes = [AllowAny]
+    def get_permissions(self):
+        return []
 
     def get(self, request):
         filters = {}
