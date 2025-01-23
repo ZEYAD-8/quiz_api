@@ -6,7 +6,7 @@ from .serializers import QuestionSerializer
 from rest_framework.permissions import IsAuthenticated
 from users.premissions import IsCreator
 from django.http import HttpResponseNotAllowed
-
+from rest_framework.permissions import AllowAny
 
 class QuestionHandlerView(APIView):
 
@@ -99,6 +99,9 @@ class QuestionHandlerView(APIView):
 
 
 class QuestionFilterView(APIView):
+    authentication_classes = []
+    presmission_classes = [AllowAny]
+
     def get(self, request):
         filters = {}
 
