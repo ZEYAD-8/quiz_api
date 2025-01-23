@@ -6,7 +6,7 @@ from .serializers import UserCustomSerializer, UserRegistrationSerializer
 from rest_framework.authtoken.models import Token
 from quizzes.serializers import QuizSerializer
 from questions.serializers import QuestionSerializer
-
+from .premissions import IsCreator
 
 class RegisterUserView(APIView):
     permission_classes = []
@@ -70,14 +70,14 @@ class UserProfileView(APIView):
         return Response(UserCustomSerializer(user).data, status=status.HTTP_200_OK)
 
 class UserCreatedQuizzesView(APIView):
-
+    permission_classes = [IsCreator]
     def get(self, request):
         user = request.user
         quizzes = user.created_quizzes()
         return Response(QuizSerializer(quizzes, many=True).data, status=status.HTTP_200_OK)
 
 class UserCreatedQuestionsView(APIView):
-    
+    permission_classes = [IsCreator]
     def get(self, request):
         user = request.user
         questions = user.created_questions()
