@@ -87,7 +87,7 @@ class QuizAttemptSerializer(serializers.ModelSerializer):
             question = question_attempt_data['question']
             user_answer = question_attempt_data['answer']
 
-            is_correct = True
+            is_correct = self.score(question, user_answer)
             QuestionAttempt.objects.create(
                 quiz_attempt=quiz_attempt,
                 question=question,
@@ -102,3 +102,41 @@ class QuizAttemptSerializer(serializers.ModelSerializer):
         quiz_attempt.max_score = quiz_attempt.total_questions
         quiz_attempt.save()
         return quiz_attempt
+
+    def score(self, question, answer):
+        if question.question_type == Question.MULTIPLE_CHOICE:
+            correct_choice = question.choices.filter(is_correct=True).first()
+            if not correct_choice and not isinstance(answer, str):
+                return False
+            return correct_choice.text.strip().lower() == answer.strip().lower()
+
+        elif question.question_type == Question.TRUE_FALSE:
+            if not question.tf_correct_answer:
+                return False
+            if isinstance(answer, bool):
+                return question.tf_correct_answer == answer
+            return question.tf_correct_answer == (answer.strip().lower() == 'true')
+
+        elif question.question_type == Question.MATCHING:
+            pairs = question.matching_pairs.all()
+            if not isinstance(answer, dict) and len(pairs) != len(answer):
+                return False
+
+            for item, match in answer.items():
+                for pair in pairs:
+                    if pair.item.strip().lower() == item.strip().lower():
+                        if pair.match.strip().lower() != match.strip().lower():
+                            return False
+            return True
+
+        elif question.question_type == Question.ORDERING:
+            ordering_items = question.ordering_items.all()
+            if not isinstance(answer, dict) and len(ordering_items) != len(answer):
+                return False
+            correct_order = {order: item.text.strip().lower() for order, item in enumerate(ordering_items, 1)}
+            for order, item in correct_order.items():
+                if item != answer.get(str(order), '').strip().lower():
+                    return False
+            return True
+
+        return False
