@@ -11,6 +11,8 @@ from users.premissions import IsCreator
 
 # Create your views here.
 class CategoryListView(APIView):
+    permission_classes = []
+    authentication_classes = []
     def get(self, request):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
