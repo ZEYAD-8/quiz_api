@@ -32,8 +32,24 @@ class AttemptQuizView(APIView):
 class UserAttemptsView(APIView):
     def get(self, request):
         user = request.user
-        attempts = QuizAttempt.objects.filter(user=user)
+
+        quiz_id = request.query_params.get('quiz_id', None)
+        if quiz_id:
+            quiz = get_object_or_404(Quiz, id=quiz_id)
+            attempts = QuizAttempt.objects.filter(user=user, quiz=quiz)
+        else:
+            attempts = QuizAttempt.objects.filter(user=user)
+
         serializer = QuizAttemptSerializer(attempts, many=True)
         return Response(serializer.data)
+    
 
 
+class OthersAttemptsView(APIView):
+
+    def get(self, request, quiz_id):
+        quiz = get_object_or_404(Quiz, id=quiz_id)
+
+        self.check_object_permissions(request, quiz)
+        serializer = QuizAttemptSerializer(quiz.attempts, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

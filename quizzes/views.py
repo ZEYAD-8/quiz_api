@@ -133,33 +133,3 @@ class QuizFilterView(APIView):
         serializer = QuizSerializer(quizzes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-from attempts.serializers import QuizAttemptSerializer
-class QuizSelfAttemptsView(APIView):
-
-    def get(self, request, quiz_id):
-        quiz = Quiz.objects.get(id=quiz_id)
-        if quiz is None:
-            return Response(
-                {"detail": "Quiz not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        user = request.user
-        attempts = quiz.attempts.filter(user=user)
-        serializer = QuizAttemptSerializer(attempts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    
-
-
-class QuizOthersAttemptsView(APIView):
-
-    def get(self, request, quiz_id):
-        quiz = Quiz.objects.get(id=quiz_id)
-        if quiz is None:
-            return Response(
-                {"detail": "Quiz not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        self.check_object_permissions(request, quiz)
-        serializer = QuizAttemptSerializer(quiz.attempts, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
