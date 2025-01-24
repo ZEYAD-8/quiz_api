@@ -65,21 +65,19 @@ class ChangePasswordView(APIView):
         return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
 
 class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
         return Response(UserCustomSerializer(user).data, status=status.HTTP_200_OK)
 
-class UserCreatedQuizzesView(APIView):
+class UserCreationsView(APIView):
     permission_classes = [IsCreator]
     def get(self, request):
         user = request.user
         quizzes = user.created_quizzes()
-        return Response(QuizSerializer(quizzes, many=True).data, status=status.HTTP_200_OK)
-
-class UserCreatedQuestionsView(APIView):
-    permission_classes = [IsCreator]
-    def get(self, request):
-        user = request.user
         questions = user.created_questions()
-        return Response(QuestionSerializer(questions, many=True).data, status=status.HTTP_200_OK)
+        return Response({
+            'questions': QuestionSerializer(questions, many=True).data,
+            'quizzes': QuizSerializer(quizzes, many=True).data
+        }, status=status.HTTP_200_OK)
