@@ -5,11 +5,10 @@ from quizzes.serializers import QuizSerializer, QuestionSerializer
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, validators=[validate_password])
     password_confirm = serializers.CharField(write_only=True)
-    is_creator = serializers.BooleanField(default=False)
 
     class Meta:
         model = UserCustom
-        fields = ['email', 'password', 'password_confirm', 'is_creator']
+        fields = ['email', 'password', 'password_confirm']
 
     def validate(self, data):
         if data['password'] != data['password_confirm']:
@@ -29,9 +28,12 @@ class UserCustomSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     number_of_created_quizzes = serializers.SerializerMethodField(read_only=True)
     number_of_created_questions = serializers.SerializerMethodField(read_only=True)
+    is_creator = serializers.BooleanField(read_only=True)
+    is_admin = serializers.BooleanField(read_only=True)
+    email = serializers.EmailField(read_only=True)
     class Meta:
         model = UserCustom
-        fields = ['id', 'email', 'is_creator', 'password', 'number_of_created_quizzes', 'number_of_created_questions']
+        fields = ['id', 'email', 'is_creator', 'is_admin', 'password', 'number_of_created_quizzes', 'number_of_created_questions']
 
 
     def create(self, validated_data):
