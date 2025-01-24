@@ -22,12 +22,12 @@ class CategorySerializer(serializers.ModelSerializer):
         if Category.objects.filter(name=name).exists():
             raise serializers.ValidationError({"name": "Category with this name already exists"})
         
-        if 'slug' not in validated_data:
-            slug = slugify(name)
-            duplicates = Category.objects.filter(slug__iexact=slug)
-            if duplicates.exists():
-                slug = f"{slug}-{duplicates.count() + 1}"
-            
-            validated_data['slug'] = slug
+        counter = 0
+        slug = slugify(name)
+        while Category.objects.filter(slug__iexact=slug).exists():
+            counter += 1
+            slug = slugify(f'{name} {counter}')
+
+        validated_data['slug'] = slug
 
         return Category.objects.create(**validated_data)
