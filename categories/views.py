@@ -7,7 +7,7 @@ from .serializers import CategorySerializer
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseNotAllowed
 from rest_framework.permissions import IsAuthenticated
-from users.premissions import IsCreator
+from rest_framework.permissions import IsAdminUser
 
 # Create your views here.
 class CategoryListView(APIView):
@@ -32,7 +32,7 @@ class CategoryHandlerView(CategoryGenericView):
 
     def get_permissions(self):
         if self.request.method in ['POST', 'PUT', 'DELETE']:
-            return [IsAuthenticated(), IsCreator()]
+            return [IsAuthenticated(), IsAdminUser()]
         return []
 
     def dispatch(self, request, *args, **kwargs):
