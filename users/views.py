@@ -81,3 +81,32 @@ class UserCreationsView(APIView):
             'questions': QuestionSerializer(questions, many=True).data,
             'quizzes': QuizSerializer(quizzes, many=True).data
         }, status=status.HTTP_200_OK)
+
+
+class ChangeRoleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        requested = request.data.get('role')
+
+        if requested is None:
+            return Response({'error': 'Role not provided'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not isinstance(requested, str) and requested.strip().lower() not in ['creator', 'admin']:
+            return Response({'error': 'Invalid role'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if requested.strip().lower() == 'admin':
+            if user.is_admin:
+                return Response({'error': 'User is already an admin'}, status=status.HTTP_400_BAD_REQUEST)
+            user.is_admin = True
+            user.is_staff = True
+
+        # if not admin, then creator
+        else:
+            if user.is_creator:
+                return Response({'error': 'User is already a creator'}, status=status.HTTP_400_BAD_REQUEST)
+            user.is_creator = True
+
+        user.save()
+        return Response({'message': 'Role changed successfully'}, status=status.HTTP_200_OK)
