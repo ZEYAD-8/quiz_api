@@ -60,9 +60,10 @@ class CategoryHandlerView(CategoryGenericView):
 
     def post(self, request, identifier=None):
         self.check_permissions(request)
+        user = request.user
         serializer = CategorySerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
