@@ -74,10 +74,12 @@ class QuizAttemptSerializer(serializers.ModelSerializer):
         return obj.user.id
 
     def create(self, validated_data):
+        request = self.context.get('request')
         question_attempts_data = validated_data.pop('answers')
-        quiz = validated_data['quiz']
-        quiz_attempt = QuizAttempt.objects.create(**validated_data)
-        
+        user = request.data.get('user')
+        quiz = request.data.get('quiz')
+        quiz_attempt = QuizAttempt.objects.create(user=user, quiz=quiz)
+
         total_score = 0
         quiz_attempt.total_questions = quiz.questions.count()
         quiz_attempt.total_questions_answered = len(question_attempts_data)

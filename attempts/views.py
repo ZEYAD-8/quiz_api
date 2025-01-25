@@ -5,9 +5,14 @@ from quizzes.models import Quiz
 from .models import QuizAttempt
 from .serializers import QuizReadAttemptSerializer, QuizAttemptSerializer
 from django.shortcuts import get_object_or_404
+from users.models import UserCustom
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 class AttemptQuizView(APIView):
+
+    def get_permissions(self):
+        return [IsAuthenticated()]
 
     def get(self, request, quiz_id):
         quiz = get_object_or_404(Quiz, id=quiz_id)
@@ -17,11 +22,11 @@ class AttemptQuizView(APIView):
     def post(self, request, quiz_id):
         user = request.user
         quiz = get_object_or_404(Quiz, id=quiz_id)
-        request.data['quiz'] = quiz_id
-        request.data['user'] = user.id
-        serializer = QuizAttemptSerializer(data=request.data)
+        request.data['quiz'] = quiz
+        request.data['user'] = user
+        serializer = QuizAttemptSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            serializer.save(user=user, quiz=quiz)
+            serializer.save()
             return Response({
                 'message': 'Quiz attempt recorded successfully.',
                 'data': serializer.data
