@@ -67,6 +67,7 @@ This API supports a variety of question types, including:
 ## Documentation
 For detailed API documentation, including request and response examples, authentication requirements, and more, refer to the Postman collection:
 **[Postman Collection Link](https://documenter.getpostman.com/view/40691710/2sAYJAexhn#intro)**
+There is also a [video](https://youtu.be/Cpncp9K9ShU?si=WNVP2Q39462nNvWv) that explains how to use the collection, endpoints and adds clarifications.
 
 The Postman collection contains all the necessary details for testing and integrating with this API.
 
